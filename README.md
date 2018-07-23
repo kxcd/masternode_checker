@@ -65,3 +65,44 @@ root: <user>
 
 sudo newaliases
 
+## Test your MTA
+
+At this point you should have a working MTA, it is prudent to test it now.  In the command below replace the email address with your email.
+
+    echo "Hello World!"|mailx -s Test EMAIL@example.com
+
+You should get the email, continue on, otherwise resolve the issue before proceeding.
+
+
+## Install and configure this script and setup up cron
+
+Now it is time to install this script and edit it to add your MNs to it.  Login to your VPS as the user that runs the dashd daemon.
+
+    cd /tmp
+    git clone https://github.com/kxcd/masternode_checker
+    mkdir ~/bin
+    cp masternode_checker.sh ~/bin
+    chmod a+x~/bin/masternode_checker.sh
+
+The script is now in the right place, but you need to edit it to add your details in there.  Use nano or vi.
+
+    nano ~/bin/masternode_checker.sh
+
+Read the comments, the first thing to change is the EMAIL= variable, add your receiving email address here, ie the one you want to get notified on.  Next edit the MASTERNODES= variable and replace the 3 example MNs with your MN(s), leave a space between each and do not line break the variable, it is OK if it wraps, but don't press ENTER.
+
+Now edit the cron to schedule the job.
+
+    crontab -e
+
+Make sure you have the below lines,
+
+    SHELL=/bin/bash
+    PATH=/usr/sbin:/usr/bin:/sbin:/bin:<another path that goes to the directory where dash-cli is>
+
+Update the PATH variable as above, next add a line at the end of the crontab, like so
+
+    0/4 * * * * ~/bin/masternode_checker.sh
+
+Save the crontab and you should be working.  To test everything is actually working, edit the masternode_checker.sh `nano ~/bin/masternode_checker.sh` and mis-type your MN address, save and wait a few mins, you should get an email, if you do revert the change you are now done, if not troubleshoot this guide.
+
+if you have more than one MN it is strongly recommended to put this on ALL the VPS servers, there is a very good reason for this, if the PVS itself goes down that VPS cannot send the email, but your other VPS might still be up and notify you that a VPS went down, IMO that is what makes this script so powerful.
