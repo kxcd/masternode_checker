@@ -26,6 +26,11 @@ do
 	if echo "$MN_FILTERED"|grep -q "${MASTERNODES[$i]}";then
 		if echo "$MN_FILTERED"|grep "${MASTERNODES[$i]}"|grep -vq "ENABLED 70210";then
 			BODY=$(echo "$BODY";echo "Found MN ${MASTERNODES[$i]}, but it is not in the ENABLED status...")
+		else
+			# The mastenode has been found in the mn list and is ENABLED 70210.
+			# One final check, verify it responds to a TCP 3-way H/S.
+			ip_port=$(echo "$MN_FILTERED"|grep "${MASTERNODES[$i]}"|sed 's/[",]//g;s/:/ /g'|awk '{print $9" "$10}')
+			echo | nc -w10 $ip_port || BODY=$(echo "$BODY";echo "MN ${MASTERNODES[$i]} does not respond to ping.")
 		fi
 	else
 		BODY=$(echo "$BODY";echo "Missing MN ${MASTERNODES[$i]}.")
