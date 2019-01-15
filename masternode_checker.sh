@@ -24,7 +24,7 @@ test -x `which dash-cli` || body="dash-cli failed to execute..."
 for ((i=0; i < ${#MASTERNODES[*]}; i++ ))
 do
 	if echo "$MN_FILTERED"|grep -q "${MASTERNODES[$i]}";then
-		if echo "$MN_FILTERED"|grep "${MASTERNODES[$i]}"|grep -vq "ENABLED 70210";then
+		if echo "$MN_FILTERED"|grep "${MASTERNODES[$i]}"|grep -vq "ENABLED 7021[03]";then
 			BODY=$(echo "$BODY";echo "Found MN ${MASTERNODES[$i]}, but it is not in the ENABLED status...")
 		else
 			# The mastenode has been found in the mn list and is ENABLED 70210.
