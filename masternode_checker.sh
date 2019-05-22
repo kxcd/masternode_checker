@@ -46,7 +46,7 @@ do
 				;;
 			1)
 				# Found a single MN payout address, so can check on the status.
-				if dash-cli masternode list full $collateral|grep -v ^[{}]|grep -vq "ENABLED 70213";then
+				if dash-cli masternode list full $collateral|grep -v ^[{}]|grep -vq "ENABLED";then
 					BODY=$(echo "$BODY";echo "MN ${MASTERNODES[$i]} is not in the ENABLED status...")
 				fi
 				;;
