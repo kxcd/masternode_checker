@@ -87,6 +87,7 @@ You should get the email, continue on, otherwise resolve the issue before procee
 
 Now it is time to install this script and edit it to add your MNs to it.  Login to your VPS as the user that runs the dashd daemon.
 
+    sudo apt install netcat jq
     cd /tmp
     git clone https://github.com/kxcd/masternode_checker
     mkdir ~/bin
