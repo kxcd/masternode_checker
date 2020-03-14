@@ -29,18 +29,29 @@ For this I followed the guide over at https://www.sbprojects.net/projects/raspbe
 
     sudo apt-get install exim4
     sudo dpkg-reconfigure exim4-config
+    sudo apt install s-nail
  Now you need to answer some questions. Don't worry I'll give you the answers to those questions.
 
    The first screen asks you what type of mail server you need. Select the second option: "mail sent by smarthost; received via SMTP or fetchmail"
+   
     The next question asks for the system mail name: Set to same as hostname (your_hostname)
+    
     Now it asks you what IP addresses should be allowed to use the server. Leave as is (127.0.0.1 ; ::1)
+    
     Other destinations for which mail is accepted: hostname
+    
     Machines to relay mail for: Leave blank.
+    
     IP address or host name of outgoing smarthost: Replace by: smtp.gmail.com::587
+    
     Hide local mail name in outgoing mail: Select: No
+    
     Keep number of DNS-queries minimal: Select: No
+    
     Delivery method for local mail: Select: "Mbox"
+    
     Split configuration into small files: Select: No
+    
     Root and postmaster mail recipient: Enter: <your user>
 
 After answering all these questions exim4 will restart and we're halfway home.
@@ -111,7 +122,7 @@ Make sure you have the below lines,
 
 Update the PATH variable as above, next add a line at the end of the crontab, like so
 
-    0/4 * * * * ~/bin/masternode_checker.sh
+    5,10,15,20,25,30,35,40,45,55 * * * * ~/bin/masternode_checker.sh
 
 Save the crontab and you should be working.  To test everything is actually working, edit the masternode_checker.sh `nano ~/bin/masternode_checker.sh` and mis-type your MN address, save and wait a few mins, you should get an email, if you do revert, the change you are now done, if not troubleshoot this guide.
 
