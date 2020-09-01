@@ -15,6 +15,25 @@ MASTERNODES=(d36f26a754b07c6d7c7f6abbe0ea740c9770bd7dfff9f25ef4e71764b999aef1 0e
 
 PROG="$0"
 
+
+
+
+# Checks that the required software is installed on this machine.
+check_dependencies(){
+
+	nc -h >/dev/null 2>&1 || progs+=" netcat"
+	jq -V >/dev/null 2>&1 || progs+=" jq"
+	
+	if [[ -n $progs ]];then
+		text="$PROG	Missing applications on your system, please run\n\n"
+		text+="sudo apt install $progs\n\nbefore running this program again."
+		echo -e "$text" >&2
+		exit 1
+	fi
+}
+check_dependencies
+
+
 # This variable gets updated after an incident occurs.
 LAST_SENT_TIME=1
 MN_FILTERED=$(dash-cli protx list|grep -v ^[][]|sed 's/.*"\(.*\)".*/\1/g'|grep $(echo "${MASTERNODES[@]}"|sed 's/ /\\|/g'))
