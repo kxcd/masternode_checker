@@ -15,9 +15,6 @@ MASTERNODES=(d36f26a754b07c6d7c7f6abbe0ea740c9770bd7dfff9f25ef4e71764b999aef1 0e
 
 PROG="$0"
 
-
-
-
 # Checks that the required software is installed on this machine.
 check_dependencies(){
 
@@ -33,20 +30,19 @@ check_dependencies(){
 }
 check_dependencies
 
-
 # This variable gets updated after an incident occurs.
-LAST_SENT_TIME=1
-MN_FILTERED=$(dash-cli protx list|grep -v ^[][]|sed 's/.*"\(.*\)".*/\1/g'|grep $(echo "${MASTERNODES[@]}"|sed 's/ /\\|/g'))
-test -x `which dash-cli` || BODY="dash-cli failed to execute...\n"
+LAST_SENT_TIME=1612756188
+MN_FILTERED=$(dash-cli protx list|jq -r '.[]'|grep $(sed 's/ /\\|/g'<<<"${MASTERNODES[@]}"))
+[[ -x `which dash-cli` ]] || BODY="dash-cli failed to execute...\n"
 
 for (( i=0; i < ${#MASTERNODES[*]}; i++ ))
 do
 	if echo "$MN_FILTERED"|grep -q "${MASTERNODES[$i]}";then
 		# Protx provided is in the protx list, so extract some facts about this masternode.
 		protx_info=$(dash-cli protx info ${MASTERNODES[$i]})
-		collateral=$(echo "$protx_info"| jq -r '"\(.collateralHash)-\(.collateralIndex)"')
-		ip_port=$(echo "$protx_info"| jq -r '.state.service'|sed 's/:/ /g')
-		posepenalty=$(echo "$protx_info"| jq -r '.state.PoSePenalty')
+		collateral=$(jq -r '"\(.collateralHash)-\(.collateralIndex)"'<<<"$protx_info")
+		ip_port=$(jq -r '.state.service'<<<"$protx_info"|sed 's/:/ /g')
+		posepenalty=$(jq -r '.state.PoSePenalty'<<<"$protx_info")
 
 		#  Check the PoSe Score and ping the masternode
 		echo | nc -z $ip_port || BODY+="MN ${MASTERNODES[$i]} does not respond to ping.\n"
@@ -73,9 +69,9 @@ do
 	fi
 done
 
-if [[ ! -z "$BODY" ]];then
+if [[ -n "$BODY" ]];then
 	# Only send an email if $FREQUENCY time has passed.
-	if (( $(date +%s) - $LAST_SENT_TIME > $FREQUENCY ));then
+	if (( EPOCHSECONDS - LAST_SENT_TIME > FREQUENCY ));then
 		BODY="Report from $(hostname)\n$BODY"
 		echo -e "$BODY"|mailx -s "*** CRITICAL MN FAULT ***" "$EMAIL"
 		sed -i "s/\(^LAST_SENT_TIME=\).*/\1$(date +%s)/" "$PROG"
