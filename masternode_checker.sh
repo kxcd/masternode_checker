@@ -20,7 +20,8 @@ check_dependencies(){
 
 	nc -h >/dev/null 2>&1 || progs+=" netcat"
 	jq -V >/dev/null 2>&1 || progs+=" jq"
-	
+	which mailx >/dev/null 2>&1 || progs+=" bsd-mailx"
+
 	if [[ -n $progs ]];then
 		text="$PROG	Missing applications on your system, please run\n\n"
 		text+="sudo apt install $progs\n\nbefore running this program again."
@@ -31,7 +32,7 @@ check_dependencies(){
 check_dependencies
 
 # This variable gets updated after an incident occurs.
-LAST_SENT_TIME=1612756188
+LAST_SENT_TIME=1
 MN_FILTERED=$(dash-cli protx list|jq -r '.[]'|grep $(sed 's/ /\\|/g'<<<"${MASTERNODES[@]}"))
 [[ -x `which dash-cli` ]] || BODY="dash-cli failed to execute...\n"
 
