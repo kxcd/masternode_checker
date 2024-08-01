@@ -42,7 +42,7 @@ check_dependencies
 # This variable gets updated after an incident occurs.
 LAST_SENT_TIME=1
 MN_FILTERED=$(dcli protx list|jq -r '.[]'|grep $(sed 's/ /\\|/g'<<<"${MASTERNODES[@]}"))
-[[ -x `which dcli` ]] || BODY="dash-cli failed to execute...\n"
+[[ -x `which dash-cli` ]] || BODY="dash-cli failed to execute...\n"
 
 for (( i=0; i < ${#MASTERNODES[*]}; i++ ))
 do
