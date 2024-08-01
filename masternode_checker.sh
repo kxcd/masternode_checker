@@ -11,9 +11,17 @@ EMAIL="YOUR.EMAIL@exmaple.com"
 
 # Update this list with your list of masternodes protx submit hash, leave a space
 # between each one, they must all be on a single unbroken line.
-MASTERNODES=(d36f26a754b07c6d7c7f6abbe0ea740c9770bd7dfff9f25ef4e71764b999aef1 0e98fdf7488a6929b2b45640973453d74698d943eb1cf1b5664fe05111b73c00)
+MASTERNODES=(3e596421618da23ec6700771c2f4cf819fd9ddec753f7889c96f7d1ecb6f9c40 1dae04eaae642a2594fe3a0e7c0382cedbb8d6743f7c9bbbaa0449af59c3b7a0)
 
 PROG="$0"
+
+PATH=$PATH:/opt/dash/bin
+dcli(){
+    dash-cli -datadir=/tmp -conf=/etc/dash.conf "$@"
+}
+
+
+
 
 # Checks that the required software is installed on this machine.
 check_dependencies(){
@@ -33,14 +41,14 @@ check_dependencies
 
 # This variable gets updated after an incident occurs.
 LAST_SENT_TIME=1
-MN_FILTERED=$(dash-cli protx list|jq -r '.[]'|grep $(sed 's/ /\\|/g'<<<"${MASTERNODES[@]}"))
-[[ -x `which dash-cli` ]] || BODY="dash-cli failed to execute...\n"
+MN_FILTERED=$(dcli protx list|jq -r '.[]'|grep $(sed 's/ /\\|/g'<<<"${MASTERNODES[@]}"))
+[[ -x `which dcli` ]] || BODY="dash-cli failed to execute...\n"
 
 for (( i=0; i < ${#MASTERNODES[*]}; i++ ))
 do
 	if echo "$MN_FILTERED"|grep -q "${MASTERNODES[$i]}";then
 		# Protx provided is in the protx list, so extract some facts about this masternode.
-		protx_info=$(dash-cli protx info ${MASTERNODES[$i]})
+		protx_info=$(dcli protx info ${MASTERNODES[$i]})
 		collateral=$(jq -r '"\(.collateralHash)-\(.collateralIndex)"'<<<"$protx_info")
 		ip_port=$(jq -r '.state.service'<<<"$protx_info"|sed 's/:/ /g')
 		posepenalty=$(jq -r '.state.PoSePenalty'<<<"$protx_info")
@@ -50,14 +58,14 @@ do
 		(( $posepenalty != 0 )) && BODY+="MN ${MASTERNODES[$i]} has PoSe Score of $posepenalty.\n"
 
 		# Now check the masternode status, first make sure it is unique
-		nodes=$(dash-cli masternode list full|grep "$collateral"|grep -v ^[{}]|wc -l)
+		nodes=$(dcli masternode list full|grep "$collateral"|grep -v ^[{}]|wc -l)
 		case $nodes in
 			0)
 				BODY+="MN ${MASTERNODES[$i]} is MISSING from masternode list...\n"
 				;;
 			1)
 				# Found a single MN payout address, so can check on the status.
-				if dash-cli masternode list full $collateral|grep -v ^[{}]|grep -vq "ENABLED";then
+				if dcli masternode list full $collateral|grep -v ^[{}]|grep -vq "ENABLED";then
 					BODY+="MN ${MASTERNODES[$i]} is not in the ENABLED status...\n"
 				fi
 				;;
